@@ -27,7 +27,7 @@
 #define NEW_LINE 1
 #define NOT_NEW_LINE 0
 
-#define SIZE 8
+#define BOARD_SIZE 8
 
 void println(char message[], char color[], int with_new_line) {
   printf("%s%s%s", color, message, RESET);
@@ -52,18 +52,23 @@ void print_knight_position(struct Knight k) {
   printf("\n Knight's  X: %d - Y: %d\n", k.x, k.y);
 }
 
+int is_valid_coordinate(int x, int y) {
+  return x < BOARD_SIZE && x >= 0 && y < BOARD_SIZE && y >= 0;
+}
+
 int min(int[]);
-void displayAccessibility(const int[SIZE][SIZE]);
-void displayChessBoard(const int[SIZE][SIZE]);
-void decreaseAccessibility(int[SIZE][SIZE], const int[SIZE][SIZE],
-                           const int[SIZE], const int[SIZE], int, int);
+void display_accessibility(const int[BOARD_SIZE][BOARD_SIZE]);
+void display_chess_board(const int[BOARD_SIZE][BOARD_SIZE]);
+void decrease_accessibility(const int[BOARD_SIZE][BOARD_SIZE],
+                            const int[BOARD_SIZE], const int[BOARD_SIZE],
+                            int[BOARD_SIZE][BOARD_SIZE], int, int);
 
 int main() {
-  int chessBoard[SIZE][SIZE] = {0};
-  int vertical_move[SIZE] = {2, 1, -1, -2, -2, -1, 1, 2};
-  int horizontal_move[SIZE] = {-1, -2, -2, -1, 1, 2, 2, 1};
-  int accessibilityRate[SIZE] = {0};
-  int accessibility[SIZE][SIZE] = {
+  int chess_board[BOARD_SIZE][BOARD_SIZE] = {0};
+  int vertical_move[BOARD_SIZE] = {2, 1, -1, -2, -2, -1, 1, 2};
+  int horizontal_move[BOARD_SIZE] = {-1, -2, -2, -1, 1, 2, 2, 1};
+  int accessibility_rate[BOARD_SIZE] = {0};
+  int accessibility[BOARD_SIZE][BOARD_SIZE] = {
       {2, 3, 4, 4, 4, 4, 3, 2}, {3, 4, 6, 6, 6, 6, 4, 3},
       {4, 6, 8, 8, 8, 8, 6, 4}, {4, 6, 8, 8, 8, 8, 6, 4},
       {4, 6, 8, 8, 8, 8, 6, 4}, {4, 6, 8, 8, 8, 8, 6, 4},
@@ -83,38 +88,39 @@ int main() {
   println("Right Now, Where are your horse?", "white", NEW_LINE);
   knight.x = input_as_int("X: ");
   knight.y = input_as_int("Y: ");
-  chessBoard[knight.x][knight.y]++;
-  decreaseAccessibility(accessibility, chessBoard, horizontal_move,
-                        vertical_move, knight.x, knight.y);
-  int movement, step = 0, tempValue;
+  chess_board[knight.x][knight.y]++;
+  decrease_accessibility(accessibility, chess_board, horizontal_move,
+                         vertical_move, knight.x, knight.y);
+  int movement, step = 0, temp_cordinate_value;
   while (step < 64) {
     clear();
-    displayChessBoard(chessBoard);
+    display_chess_board(chess_board);
     print_knight_position(knight);
-    displayAccessibility(accessibility);
+    display_accessibility(accessibility);
     // Select suitable movement(least accessibility and knight is not never
     // exist to there )
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < BOARD_SIZE; i++) {
       movement = i;
       int y = knight.y + vertical_move[movement];
       int x = knight.x + horizontal_move[movement];
-      if (x < 8 && x >= 0 && y < 8 && y >= 0 && (chessBoard[x][y] != 1)) {
-        accessibilityRate[i] = accessibility[x][y];
+      if (is_valid_coordinate(x, y) && (chess_board[x][y] != 1)) {
+        accessibility_rate[i] = accessibility[x][y];
       } else {
-        accessibilityRate[i] = 10;
+        accessibility_rate[i] = 10;
       }
     }
-    movement = min(accessibilityRate);
+    movement = min(accessibility_rate);
     knight.y += vertical_move[movement];
     knight.x += horizontal_move[movement];
-    tempValue = chessBoard[knight.x][knight.y];
-    if ((tempValue == 1) && (step != 63)) {
+    temp_cordinate_value = chess_board[knight.x][knight.y];
+    if ((temp_cordinate_value == 1) &&
+        (step != (BOARD_SIZE * BOARD_SIZE - 1))) {
       println("Game over!!!", RED, NEW_LINE);
       break;
     }
-    decreaseAccessibility(accessibility, chessBoard, horizontal_move,
-                          vertical_move, knight.x, knight.y);
-    chessBoard[knight.x][knight.y]++;
+    decrease_accessibility(chess_board, horizontal_move, vertical_move,
+                           accessibility, knight.x, knight.y);
+    chess_board[knight.x][knight.y]++;
     step++;
     println("Next Movement: ", YELLOW, NEW_LINE);
     printf("%d\n", movement);
@@ -122,35 +128,36 @@ int main() {
     printf("%d\n", step);
     sleep(1);
   }
-  if (step == 64) {
+  if (step == BOARD_SIZE * BOARD_SIZE) {
     printf("Well done...", CYAN, NEW_LINE);
   } else {
     println("Game End...", BLUE, NEW_LINE);
   }
 }
 
-void displayAccessibility(const int accessibility[SIZE][SIZE]) {
+void display_accessibility(const int accessibility[BOARD_SIZE][BOARD_SIZE]) {
   println("\n******Accessibility******\n\n", GREEN, NEW_LINE);
-  for (int i = 0; i < SIZE; i++)
-    for (int j = 0; j < SIZE; j++)
-      printf("%3d%s", accessibility[i][j], (j == SIZE - 1) ? "\n" : "");
+  for (int i = 0; i < BOARD_SIZE; i++)
+    for (int j = 0; j < BOARD_SIZE; j++)
+      printf("%3d%s", accessibility[i][j], (j == BOARD_SIZE - 1) ? "\n" : "");
 
   printf("\n");
 }
 
-void decreaseAccessibility(int accessibility[SIZE][SIZE],
-                           const int chessBoard[SIZE][SIZE],
-                           const int horizontal_move[SIZE],
-                           const int vertical_move[SIZE], int x, int y) {
+void decrease_accessibility(const int chess_board[BOARD_SIZE][BOARD_SIZE],
+                            const int horizontal_move[BOARD_SIZE],
+                            const int vertical_move[BOARD_SIZE],
+                            int accessibility[BOARD_SIZE][BOARD_SIZE], int x,
+                            int y) {
   int movement;
   accessibility[x][y] = 0;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < BOARD_SIZE; i++) {
     movement = i;
     x += horizontal_move[movement];
     y += vertical_move[movement];
-    if (x < 8 && x >= 0 && y < 8 && y >= 0) {
+    if (is_valid_coordinate(x, y)) {
       accessibility[x][y]--;
-      if (chessBoard[x][y] == 1)
+      if (chess_board[x][y] == 1)
         accessibility[x][y] = 0;
     }
     x -= horizontal_move[movement];
@@ -161,7 +168,7 @@ void decreaseAccessibility(int accessibility[SIZE][SIZE],
 // find Minimum! // array is Accessibility Rate
 int min(int array[]) {
   int index = 0;
-  for (int i = 1; i < SIZE; i++) {
+  for (int i = 1; i < BOARD_SIZE; i++) {
     if (array[index] > array[i]) {
       array[index] = array[i];
       index = i;
@@ -170,9 +177,9 @@ int min(int array[]) {
   return index;
 }
 
-void displayChessBoard(const int chessBoard[SIZE][SIZE]) {
+void display_chess_board(const int chess_board[BOARD_SIZE][BOARD_SIZE]) {
   println("\n********Chess Board********\n\n", RED, NEW_LINE);
-  for (int i = 0; i < SIZE; i++)
-    for (int j = 0; j < SIZE; j++)
-      printf("%3d%s", chessBoard[i][j], (j == SIZE - 1) ? "\n" : "");
+  for (int i = 0; i < BOARD_SIZE; i++)
+    for (int j = 0; j < BOARD_SIZE; j++)
+      printf("%3d%s", chess_board[i][j], (j == BOARD_SIZE - 1) ? "\n" : "");
 }
