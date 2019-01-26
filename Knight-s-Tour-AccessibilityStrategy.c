@@ -43,10 +43,18 @@ int input_as_int(char message[]) {
   return temp_input;
 }
 
+struct Knight {
+  int x;
+  int y;
+};
+
+void print_knight_position(struct Knight k) {
+  printf("\n Knight's  X: %d - Y: %d\n", k.x, k.y);
+}
+
 int min(int[]);
 void displayAccessibility(const int[SIZE][SIZE]);
 void displayChessBoard(const int[SIZE][SIZE]);
-void sayWhereIsKnight(int, int);
 void decreaseAccessibility(int[SIZE][SIZE], const int[SIZE][SIZE],
                            const int[SIZE], const int[SIZE], int, int);
 
@@ -71,25 +79,25 @@ int main() {
               (+y)
               South
   */
+  struct Knight knight;
   println("Right Now, Where are your horse?", "white", NEW_LINE);
-  int x_coordinate_knight = input_as_int("X: ");
-  int y_coordinate_knight = input_as_int("Y: ");
-  chessBoard[x_coordinate_knight][y_coordinate_knight]++;
+  knight.x = input_as_int("X: ");
+  knight.y = input_as_int("Y: ");
+  chessBoard[knight.x][knight.y]++;
   decreaseAccessibility(accessibility, chessBoard, horizontal_move,
-                        vertical_move, x_coordinate_knight,
-                        y_coordinate_knight);
+                        vertical_move, knight.x, knight.y);
   int movement, step = 0, tempValue;
   while (step < 64) {
     clear();
     displayChessBoard(chessBoard);
-    sayWhereIsKnight(x_coordinate_knight, y_coordinate_knight);
+    print_knight_position(knight);
     displayAccessibility(accessibility);
     // Select suitable movement(least accessibility and knight is not never
     // exist to there )
     for (int i = 0; i < 8; i++) {
       movement = i;
-      int y = y_coordinate_knight + vertical_move[movement];
-      int x = x_coordinate_knight + horizontal_move[movement];
+      int y = knight.y + vertical_move[movement];
+      int x = knight.x + horizontal_move[movement];
       if (x < 8 && x >= 0 && y < 8 && y >= 0 && (chessBoard[x][y] != 1)) {
         accessibilityRate[i] = accessibility[x][y];
       } else {
@@ -97,17 +105,16 @@ int main() {
       }
     }
     movement = min(accessibilityRate);
-    y_coordinate_knight += vertical_move[movement];
-    x_coordinate_knight += horizontal_move[movement];
-    tempValue = chessBoard[x_coordinate_knight][y_coordinate_knight];
+    knight.y += vertical_move[movement];
+    knight.x += horizontal_move[movement];
+    tempValue = chessBoard[knight.x][knight.y];
     if ((tempValue == 1) && (step != 63)) {
       println("Game over!!!", RED, NEW_LINE);
       break;
     }
     decreaseAccessibility(accessibility, chessBoard, horizontal_move,
-                          vertical_move, x_coordinate_knight,
-                          y_coordinate_knight);
-    chessBoard[x_coordinate_knight][y_coordinate_knight]++;
+                          vertical_move, knight.x, knight.y);
+    chessBoard[knight.x][knight.y]++;
     step++;
     println("Next Movement: ", YELLOW, NEW_LINE);
     printf("%d\n", movement);
@@ -127,6 +134,8 @@ void displayAccessibility(const int accessibility[SIZE][SIZE]) {
   for (int i = 0; i < SIZE; i++)
     for (int j = 0; j < SIZE; j++)
       printf("%3d%s", accessibility[i][j], (j == SIZE - 1) ? "\n" : "");
+
+  printf("\n");
 }
 
 void decreaseAccessibility(int accessibility[SIZE][SIZE],
@@ -159,10 +168,6 @@ int min(int array[]) {
     }
   }
   return index;
-}
-
-void sayWhereIsKnight(int x, int y) {
-  printf("\n Knight's  X: %d - Y: %d\n", x, y);
 }
 
 void displayChessBoard(const int chessBoard[SIZE][SIZE]) {
