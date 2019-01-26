@@ -16,40 +16,31 @@
 
 // https://stackoverflow.com/questions/3585846/color-text-in-terminal-applications-in-unix
 #define RED "\x1B[31m"
-#define GRN "\x1B[32m"
-#define YEL "\x1B[33m"
-#define BLU "\x1B[34m"
-#define MAG "\x1B[35m"
-#define CYN "\x1B[36m"
-#define WHT "\x1B[37m"
+#define GREEN "\x1B[32m"
+#define YELLOW "\x1B[33m"
+#define BLUE "\x1B[34m"
+#define MAGENTA "\x1B[35m"
+#define CYAN "\x1B[36m"
+#define WHITE "\x1B[37m"
 #define RESET "\x1B[0m"
+
+#define NEW_LINE 1
+#define NOT_NEW_LINE 0
 
 #define SIZE 8
 
-char *get_color(char mode[]) {
-  if (strcmp(mode, "red") == 0) {
-    return RED;
-  } else if (strcmp(mode, "green") == 0) {
-    return GRN;
-  } else if (strcmp(mode, "yellow") == 0) {
-    return YEL;
-  } else if (strcmp(mode, "blue") == 0) {
-    return BLU;
-  } else if (strcmp(mode, "magenta") == 0) {
-    return MAG;
-  } else if (strcmp(mode, "cyan") == 0) {
-    return CYN;
-  } else if (strcmp(mode, "white") == 0) {
-    return WHT;
-  } else {
-    printf("Oooo, Your println mode isn't correct!");
-    exit(-1);
+void println(char message[], char color[], int with_new_line) {
+  printf("%s%s%s", color, message, RESET);
+  if (with_new_line == NEW_LINE) {
+    printf("\n");
   }
 }
 
-void println(char message[], char colorMode[]) {
-  char *color = get_color(colorMode);
-  printf("%s%s%s\n", color, message, RESET);
+int input_as_int(char message[]) {
+  int temp_input;
+  println(message, WHITE, NOT_NEW_LINE);
+  scanf("%d", &temp_input);
+  return temp_input;
 }
 
 int min(int[]);
@@ -60,7 +51,6 @@ void decreaseAccessibility(int[SIZE][SIZE], const int[SIZE][SIZE],
                            const int[SIZE], const int[SIZE], int, int);
 
 int main() {
-  int x_coordinate_knight, y_coordinate_knight;
   int chessBoard[SIZE][SIZE] = {0};
   int vertical_move[SIZE] = {2, 1, -1, -2, -2, -1, 1, 2};
   int horizontal_move[SIZE] = {-1, -2, -2, -1, 1, 2, 2, 1};
@@ -81,8 +71,9 @@ int main() {
               (+y)
               South
   */
-  printf("Right Now, Where are your horse?In order of x and y: ");
-  scanf("%d%d", &x_coordinate_knight, &y_coordinate_knight);
+  println("Right Now, Where are your horse?", "white", NEW_LINE);
+  int x_coordinate_knight = input_as_int("X: ");
+  int y_coordinate_knight = input_as_int("Y: ");
   chessBoard[x_coordinate_knight][y_coordinate_knight]++;
   decreaseAccessibility(accessibility, chessBoard, horizontal_move,
                         vertical_move, x_coordinate_knight,
@@ -110,7 +101,7 @@ int main() {
     x_coordinate_knight += horizontal_move[movement];
     tempValue = chessBoard[x_coordinate_knight][y_coordinate_knight];
     if ((tempValue == 1) && (step != 63)) {
-      println("Game over!!!", "red");
+      println("Game over!!!", RED, NEW_LINE);
       break;
     }
     decreaseAccessibility(accessibility, chessBoard, horizontal_move,
@@ -118,21 +109,21 @@ int main() {
                           y_coordinate_knight);
     chessBoard[x_coordinate_knight][y_coordinate_knight]++;
     step++;
-    println("\t\t\tNext Movement: ", "yellow");
-    printf("\t\t\t%d\n", movement);
-    println("\t\t\tStep: ", "magenta");
-    printf("\t\t\t%d\n", step);
+    println("Next Movement: ", YELLOW, NEW_LINE);
+    printf("%d\n", movement);
+    println("Step: ", MAGENTA, NEW_LINE);
+    printf("%d\n", step);
     sleep(1);
   }
   if (step == 64) {
-    printf("Well done...", "cyan");
+    printf("Well done...", CYAN, NEW_LINE);
   } else {
-    println("Game End...", "blue");
+    println("Game End...", BLUE, NEW_LINE);
   }
 }
 
 void displayAccessibility(const int accessibility[SIZE][SIZE]) {
-  println("\n******Accessibility******\n\n", "green");
+  println("\n******Accessibility******\n\n", GREEN, NEW_LINE);
   for (int i = 0; i < SIZE; i++)
     for (int j = 0; j < SIZE; j++)
       printf("%3d%s", accessibility[i][j], (j == SIZE - 1) ? "\n" : "");
@@ -175,7 +166,7 @@ void sayWhereIsKnight(int x, int y) {
 }
 
 void displayChessBoard(const int chessBoard[SIZE][SIZE]) {
-  println("\n********Chess Board********\n\n", "red");
+  println("\n********Chess Board********\n\n", RED, NEW_LINE);
   for (int i = 0; i < SIZE; i++)
     for (int j = 0; j < SIZE; j++)
       printf("%3d%s", chessBoard[i][j], (j == SIZE - 1) ? "\n" : "");
